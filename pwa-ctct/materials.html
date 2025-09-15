@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tài liệu học tập – CTĐ, CTCT</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    /* CSS đầy đủ như bản em đã gửi materials.html trước */
+        :root{--brand:#a00000;--bg:#f5f6f8;--card:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .topbar{display:flex;gap:12px;align-items:center;background:var(--brand);color:#fff;padding:14px 16px}
+    .topbar a{color:#fff;text-decoration:none}
+    .topbar h2{margin:0;font-size:18px;font-weight:700}
+    .container{max-width:980px;margin:16px auto;padding:0 12px}
+    .doc{background:var(--card);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px;margin-bottom:16px}
+    .doc h3{margin:6px 8px}
+    .muted{color:var(--muted);font-size:14px;margin:0 8px 12px}
+    .pdf-wrap{
+      margin:12px 8px 16px;
+      background:#f3f4f6;border:1px solid var(--border);border-radius:10px;overflow:hidden;
+      aspect-ratio:16/9; /* mobile sẽ đổi ở media query bên dưới */
+    }
+    .pdf{width:100%;height:100%;border:0;display:block;background:#000}
+    @media (max-width:680px){ .pdf-wrap{aspect-ratio:3/4} }
+    /* Ẩn nhanh khi cần */
+    [hidden]{display:none!important}
+
+  </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    }
+  </script>
+</head>
+<body>
+  <!-- Nội dung + script loadMaterials như bản materials.html em đã chỉnh -->
+   <div class="topbar">
+    <a href="index.html">← Trang chủ</a>
+    <h2>TÀI LIỆU HỌC TẬP</h2>
+  </div>
+
+  <main class="container" id="list">
+    <p class="muted">Đang tải tài liệu…</p>
+  </main>
+
+  <script>
+    // ===== CẤU HÌNH (THAY GIÁ TRỊ 2 DÒNG NÀY) =====
+    const SHEET_API = 'https://script.google.com/macros/s/AKfycby3HoIrf6YrbUtGmsMEdLL8C6UwENUKKFqyXJhm-znNgDQ1ADXV0GDKQ-SmY5-auYmYmg/exec'; // ví dụ: https://script.google.com/macros/s/AKfycb.../exec
+    const MATERIALS_FOLDER_ID = '14Vwo5fxjSHtxu9mDOvNUDQrnve6pvrfK'; // ví dụ: 1AbCdEfGh123...
+
+    // Escape đơn giản để render an toàn
+    const esc = (s) => String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+    // Cố gắng tạo URL có thể embed:
+    // - Nếu Apps Script trả về d.embedUrl thì ưu tiên dùng.
+    // - Nếu là link drive dạng /file/d/{id}/view thì chuyển sang /preview.
+    // - Nếu là link ngoài, dùng Google Docs Viewer để nhúng.
+    function toEmbedUrl(d){
+      if (d.embedUrl) return d.embedUrl;
+      const url = String(d.url || '');
+      if (/drive\.google\.com\/file\/d\/[^/]+\/view/.test(url)) {
+        return url.replace('/view','/preview');
+      }
+      // Fallback: Google Docs viewer
+      return 'https://drive.google.com/viewer?embedded=1&url=' + encodeURIComponent(url);
+    }
+
+    async function loadMaterials(){
+      const root = document.getElementById('list');
+      try{
+        const url = `${SHEET_API}?action=materials&folderId=${encodeURIComponent(MATERIALS_FOLDER_ID)}`;
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        const files = Array.isArray(data.files) ? data.files : [];
+
+        if (!files.length){
+          root.innerHTML = '<p class="muted">Chưa có PDF trong thư mục Google Drive đã chỉ định.</p>';
+          return;
+        }
+
+        root.innerHTML = files.map(d => {
+          const title = esc(d.title || 'Tài liệu');
+          const url   = esc(d.url || '#');
+          const embed = esc(toEmbedUrl(d));
+
+          return `
+            <section class="doc">
+              <h3>${title}</h3>
+              <p class="muted">Nếu không hiển thị, mở trực tiếp:
+                <a href="${url}" target="_blank" rel="noopener">Link PDF</a></p>
+              <div class="pdf-wrap">
+                <iframe class="pdf" allow="fullscreen" src="${embed}" title="${title}"></iframe>
+              </div>
+            </section>
+          `;
+        }).join('');
+      }catch(err){
+        console.error(err);
+        root.innerHTML = '<p class="muted">Không tải được danh sách tài liệu. Kiểm tra URL Apps Script và quyền chia sẻ thư mục (Anyone with the link → Viewer).</p>';
+      }
+    }
+    loadMaterials();
+  </script>
+
+</body>
+</html>

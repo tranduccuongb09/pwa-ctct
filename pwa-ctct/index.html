@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CTĐ, CTCT – Trang chủ</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    }
+  </script>
+</head>
+<body class="home">
+  <div class="home-overlay" aria-hidden="true"></div>
+
+  <header class="home-hero">
+    <h1>ỨNG DỤNG HỌC TẬP VÀ KIỂM TRA NHẬN THỨC CHÍNH TRỊ<br>
+      CỦA BAN CHỈ HUY PTKV3 – TÂN YÊN/BỘ CHQS TỈNH BẮC NINH</h1>
+  </header>
+
+  <div class="home-wrap">
+    <main class="home-grid">
+      <!-- 1) Tài liệu học tập -->
+      <section class="home-card" data-link="materials.html" role="button" tabindex="0" aria-label="Tài liệu học tập">
+        <img class="home-icon-img" src="icons/icon-materials.png" alt="Tài liệu học tập">
+        <h3>Tài liệu học tập</h3>
+        <p>Nơi lưu trữ tài liệu học tập chính trị trong năm 2025.</p>
+        <a class="home-btn is-disabled" aria-disabled="true">Mở tài liệu</a>
+      </section>
+
+      <!-- 2) Làm bài kiểm tra -->
+      <section class="home-card" data-link="quiz.html" role="button" tabindex="0" aria-label="Làm bài kiểm tra">
+        <img class="home-icon-img" src="icons/icon-exam.png" alt="Làm bài kiểm tra">
+        <h3>Làm bài kiểm tra</h3>
+        <p>30 câu – 30 phút. Hệ thống tự chấm điểm và ghi kết quả.</p>
+        <a class="home-btn is-disabled" aria-disabled="true">Vào làm bài</a>
+      </section>
+
+      <!-- 3) Tra cứu kết quả -->
+      <section class="home-card"
+               data-link="https://docs.google.com/spreadsheets/d/1REnIveQbSDWIHZcPCyx5NCLxxEpH-cxZ178V201pgVE/edit?usp=sharing"
+               data-blank="1"
+               role="button" tabindex="0" aria-label="Tra cứu kết quả">
+        <img class="home-icon-img" src="icons/icon-results.png" alt="Tra cứu kết quả">
+        <h3>Tra cứu kết quả</h3>
+        <p>Xem lại kết quả kiểm tra nhận thức.</p>
+        <a class="home-btn is-disabled" rel="noopener" aria-disabled="true">Mở bảng điểm</a>
+      </section>
+    </main>
+
+    <footer class="home-footer">© Đơn vị: Ban Chỉ huy PTKV3 – Tân Yên</footer>
+  </div>
+
+  <script>
+    function activateCard(card) {
+      document.querySelectorAll('.home-card').forEach(c => {
+        c.classList.remove('home-active');
+        const b = c.querySelector('.home-btn');
+        if (b) {
+          b.classList.remove('is-active');
+          b.classList.add('is-disabled');
+          b.removeAttribute('href');
+          b.removeAttribute('target');
+          b.setAttribute('aria-disabled','true');
+        }
+      });
+
+      card.classList.add('home-active');
+      const btn = card.querySelector('.home-btn');
+      if (btn) {
+        btn.classList.remove('is-disabled');
+        btn.classList.add('is-active');
+        btn.removeAttribute('aria-disabled');
+
+        const href  = card.dataset.link || '#';
+        const blank = card.dataset.blank === '1';
+        btn.href = href;
+        btn.target = blank ? '_blank' : '_self';
+      }
+    }
+
+    document.querySelectorAll('.home-card').forEach(card => {
+      card.addEventListener('click', () => activateCard(card));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activateCard(card);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
