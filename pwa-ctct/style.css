@@ -45,12 +45,16 @@ body.home{
 .home-grid{
   max-width:1040px;margin:0 auto;padding:24px 16px;
   display:grid;gap:28px;grid-template-columns:repeat(3,minmax(320px,1fr));
+  justify-content:center; /* canh giữa khi thiếu cột */
 }
 @media (max-width:1024px){
   .home-grid{grid-template-columns:repeat(2,minmax(320px,1fr));}
 }
 @media (max-width:680px){
-  .home-grid{grid-template-columns:1fr;}
+  .home-grid{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
 }
 
 .home-card{
@@ -87,4 +91,37 @@ body.home{
 .home-footer{
   position:relative;z-index:1;text-align:center;color:#FFE699;font-size:14px;
   padding-bottom:26px;text-shadow:0 1px 4px rgba(0,0,0,.35)
+}
+
+/* ===== MOBILE TỐI ƯU ===== */
+@media (max-width:680px){
+  /* card không chiếm full bề ngang, có khoảng thở hai bên */
+  .home-card{
+    width:92%;
+    max-width:360px;   /* giới hạn bề rộng card */
+    margin:0 auto;
+    min-height:360px;  /* hạ chiều cao tối thiểu */
+    padding:22px 18px; /* giảm padding */
+  }
+  .home-icon-img{width:88px;height:88px;margin-bottom:12px}
+  .home-card h3{font-size:20px}
+  .home-card p{font-size:14px;max-width:unset}
+  .home-btn{width:100%;max-width:220px}
+}
+
+/* ===== LANDSCAPE TỐI ƯU (điện thoại xoay ngang) ===== */
+@media (orientation:landscape) and (max-height:480px){
+  /* 2 cột để tận dụng ngang rộng */
+  .home-grid{
+    grid-template-columns:repeat(2, minmax(260px, 1fr));
+    gap:18px;
+  }
+  .home-card{
+    min-height:300px;
+    padding:18px 16px;
+  }
+  .home-icon-img{width:80px;height:80px}
+  .home-card h3{font-size:18px}
+  .home-card p{font-size:13.5px}
+  .home-btn{padding:10px 14px}
 }
